@@ -1,0 +1,36 @@
+<h1 @text="item.author"></h1>
+
+<li :class="a > b ? 'x' : 'y'" data-after="1">after</li>
+
+<p webc:if="items.length > 0 && count < max">text</p>
+
+<li :class="a > b" title="t">x</li>
+
+<p webc:if="kind === 'b'" class="c">y</p>
+
+<img @attributes="({ 'data-x': 1, y: item.y })" />
+
+<div :style="({ color: theme })">s</div>
+
+<template webc:nokeep @html="content"></template>
+
+<my-c @label="Hi" webc:type="js" :@n="n"></my-c>
+
+<div webc:for="(key, value) in obj"></div>
+
+<ul webc:for="article of item.articles"></ul>
+
+<c webc:if="/<x class=&quot;y-/.test(s)"></c>
+
+<p @text="'<3 ' + n"></p>
+
+<p @text=""></p>
+
+<p webc:if="a && b">m</p>
+
+<p>plain text with :attr="x" and @text="y" and webc:if="z" outside a tag</p>
+
+<script webc:setup>
+  export const x = 1;
+</script>
+<style webc:scoped="my-prefix"></style>

@@ -1,0 +1,92 @@
+---js
+{
+  pagination: { data: "items", alias: "item" },
+}
+---
+
+<!-- Conditionals: webc:if, webc:elseif, webc:else -->
+<ul>
+  <li webc:if="items.length > 0">
+    <p webc:if="count > 10">Many</p>
+    <p webc:elseif="count > 0">Some</p>
+    <p webc:else>None</p>
+  </li>
+
+  <!-- Loops: webc:for (iterable and object forms) -->
+  <li webc:for="item of items" :data-index="index + 1">
+    <a :href="item.url" @text="item.title"></a>
+  </li>
+  <li webc:for="(item, index) of items" @text="index"></li>
+  <li webc:for="(key, value) in item.meta" @text="value"></li>
+</ul>
+
+<!-- Component wiring: webc:is, webc:import -->
+<div webc:is="my-card"></div>
+<div webc:is="my-card" webc:import="./components/my-card.webc"></div>
+<syntax-highlight
+  webc:import="npm:@11ty/eleventy-plugin-syntaxhighlight"
+></syntax-highlight>
+
+<!-- Host tag: webc:root (merge and override), webc:keep, webc:nokeep -->
+<template webc:root class="another-class"></template>
+<button webc:root="override">Some component content</button>
+<html-only-component webc:keep></html-only-component>
+<css-js-component webc:nokeep></css-js-component>
+
+<!-- Render functions and template syntaxes: webc:type (js, render, 11ty), 11ty:type -->
+<script webc:type="js">
+  `<img src="${item.image}" alt="${item.title}">`;
+</script>
+<script webc:type="render">
+  export default function () {
+    return `<img src="${this.src}" alt="${this.alt}">`;
+  }
+</script>
+<template webc:type="11ty" 11ty:type="md"># Heading</template>
+<template webc:type="11ty" 11ty:type="liquid,md">## {{ title }}</template>
+
+<!-- Processing: webc:raw, webc:ignore -->
+<template webc:raw><my-component>Not processed</my-component></template>
+<template webc:raw @html="item.content"></template>
+<template webc:ignore>Usage: <my-component></my-component></template>
+
+<!-- Server setup: webc:setup -->
+<script webc:setup>
+  const color = "blue";
+</script>
+<p @text="color"></p>
+
+<!-- Styles and assets: webc:scoped (generated and named), webc:bucket (static and dynamic) -->
+<style webc:scoped>
+  :host {
+    color: blue;
+  }
+</style>
+<style webc:scoped="my-prefix">
+  :host {
+    color: blue;
+  }
+</style>
+<style webc:bucket="defer">
+  .card {
+    color: blue;
+  }
+</style>
+<script webc:bucket="defer">
+  /* deferred JS */
+</script>
+<script :webc:bucket="bucketName">
+  /* bucket chosen at build time */
+</script>
+
+<!-- Content: @html, @raw, @text, @attributes -->
+<template @html="item.content" webc:nokeep></template>
+<div @html="renderPost(item)"></div>
+<template @raw="item.content" webc:nokeep></template>
+<p @text="item.title"></p>
+<p @text="`${items.length} items`"></p>
+<img @attributes class="avatar-image" />
+<img @attributes="({ src: item.image, alt: item.title })" />
+
+<!-- Completion check: put the cursor after `webc:` or `@` and trigger suggestions -->
+<div></div>

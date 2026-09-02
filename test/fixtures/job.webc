@@ -1,0 +1,111 @@
+---
+title: job
+standfirst: I like making things for the web, in high trust environments, with talented people who give a shit.
+layout: custom
+---
+
+<section class="content-body">
+  <h1 @text="title"></h1>
+  <p
+    class="standfirst"
+    @text="standfirst"></p>
+  <p>
+    I have been working in Australian media for about
+    <template
+      webc:nokeep
+      @text="yearsSince('2011-10-01')"></template>
+    years, across hands-on engineering and leadership.
+  </p>
+</section>
+<script webc:setup>
+  export const companyOf = (role) =>
+    $data.resume.find((job) => job.roles.some((r) => r.id === role.id));
+  export const stintWorthStating = (role) => {
+    const job = companyOf(role);
+    const stay = job.roles[0].dateEnd
+      ? durationLong(
+          job.roles[job.roles.length - 1].dateStart,
+          job.roles[0].dateEnd,
+        )
+      : null;
+    return stay !== durationLong(role.dateStart, role.dateEnd || new Date());
+  };
+</script>
+<ol class="resume-rail">
+  <li
+    webc:for="job of resume"
+    class="resume-company">
+    <div class="resume-company-head">
+      <p class="resume-company-meta">
+        <time-duration
+          webc:if="job.roles[0].dateEnd"
+          :start="job.roles[job.roles.length - 1].dateStart"
+          :end="job.roles[0].dateEnd"></time-duration>
+        <span
+          webc:if="!job.roles[0].dateEnd"
+          class="tag"
+          >Present</span
+        >
+      </p>
+      <a
+        class="resume-logo"
+        :href="job.companyUrl"
+        tabindex="-1"
+        aria-hidden="true">
+        <img
+          :src="imageUrl(job.companyLogo, 352)"
+          :srcset="imageSrcset(job.companyLogo, [176, 352])"
+          sizes="80px"
+          alt=""
+          loading="lazy"
+          decoding="async" />
+      </a>
+      <h2 class="resume-company-name">
+        <a
+          class="link-underline-hover"
+          :href="job.companyUrl"
+          @text="job.companyName"></a>
+      </h2>
+    </div>
+    <ol class="resume-roles">
+      <li
+        webc:for="role of job.roles"
+        class="resume-item"
+        :id="role.id">
+        <p
+          webc:if="stintWorthStating(role)"
+          class="resume-meta">
+          <time-duration
+            :start="role.dateStart"
+            :end="role.dateEnd ? role.dateEnd : new Date()"></time-duration>
+        </p>
+        <span class="resume-marker"></span>
+        <div class="resume-card">
+          <p class="resume-title">
+            <span @text="role.title"></span>
+            <small class="resume-dates">
+              <time-date
+                :date="role.dateStart"
+                precision="month"
+                :short="true"></time-date>
+              <span class="tag">→</span>
+              <time-date
+                webc:if="role.dateEnd"
+                :date="role.dateEnd"
+                precision="month"
+                :short="true"></time-date>
+              <span
+                webc:if="!role.dateEnd"
+                class="tag"
+                >Present</span
+              >
+            </small>
+          </p>
+          <p
+            class="resume-summary"
+            @html="role.description"></p>
+        </div>
+      </li>
+    </ol>
+  </li>
+</ol>

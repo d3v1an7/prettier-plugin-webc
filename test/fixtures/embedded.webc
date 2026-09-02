@@ -1,0 +1,33 @@
+---js
+{
+  layout: 'base',
+  eleventyComputed: { title: (data) => data.page.fileSlug }
+}
+---
+<script webc:setup>
+export const x = (a)=>{return a+1}
+</script>
+<script webc:type="js">
+const y   = 1; export default y
+</script>
+<script type="module">import x from "y"; const y   = 1</script>
+<style webc:scoped>
+:host{display:block}
+p{color:red}
+</style>
+<span>a</span><template webc:type="11ty" 11ty:type="md">
+# Heading
+
+Para with **bold** and {{ title }}.
+
+- list
+</template><span>b</span>
+<template webc:type="js">
+  const items = Array.from({ length: count }, (_, i) => `<li>${title} ${i + 1}</li>`);
+  export default `<ul>${items.join("")}</ul>`;
+</template>
+<template webc:type="render" webc:raw>
+  return `<p>${count > 2 ? "many" : "few"}</p>`;
+</template>
+<div><template   webc:type="11ty"   11ty:type="njk">{% if x %}<b>y</b>{% endif %}</template></div>
+<template webc:raw><my-component :a="b"></my-component></template>

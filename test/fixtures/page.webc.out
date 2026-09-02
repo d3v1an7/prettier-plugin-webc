@@ -1,0 +1,109 @@
+---
+layout: base
+---
+
+<!--
+  A story's own page, and the last thing on the site Pagefind reads out of the
+  rendered HTML. Everything else is a record built from the timeline collection
+  (config/search.js), because a pic or a status is the whole of its own card. An
+  essay is the opposite — the card is a teaser and the text is here — so
+  `data-pagefind-body` puts the whole of it in the index and its timeline event
+  is skipped over there.
+
+  The filter is hardcoded because this layout has exactly one caller. `txt` is
+  the section token the /search/ facet filters on, so a story and a status answer
+  to the same checkbox the way they answer to the same nav item.
+
+  The four meta keys are the ones config/search.js stamps on every custom
+  record: /search/ draws a result as the card flattened, and an essay has to
+  arrive carrying the same four or it is the one section that comes back looking
+  like something else.
+
+  `fulltext` is the fifth, and says the record's text is a page. Everything else
+  in the index is the whole of its own card, so its description is all there is
+  to show — but a hit in a story is usually a sentence four paragraphs down that
+  neither the title nor the standfirst contains, so /search/ prints Pagefind's
+  excerpt for these instead.
+
+  **All four go through their own `data-` attribute, and that is not
+  decoration.** `data-pagefind-meta` has two forms and only `key[attribute]`
+  takes more than one pair; the inline `key:value` reads everything after the
+  first colon as the value, comma and all. So `data-pagefind-meta="label:txt/blog,
+  date:…"` is one key called `label` whose value is that entire string — which is
+  what shipped, and what a result row printed where its section tag belonged.
+
+  It is also why the thumbnail is further down on the <img>: a Cloudflare Images
+  URL contains `width=352,format=auto`, which even the attribute form would split
+  in half if the URL were written inline here.
+-->
+<main
+  id="content"
+  class="wrapper padding-x padding-y width-reading flex-grow"
+  data-pagefind-body
+  data-pagefind-filter="type:txt"
+  data-label="txt/blog"
+  data-fulltext="1"
+  :data-date="dateHuman(date, 'day', undefined, true)"
+  :data-datetime="dateMachine(date)"
+  data-pagefind-meta="label[data-label], fulltext[data-fulltext], date[data-date], datetime[data-datetime]"
+>
+  <article class="content-body">
+    <header class="mb-10">
+      <span class="flex space-x-3">
+        <p
+          webc:for="item of filteredTags(tags)"
+          class="tag !mb-6"
+          @text="`#${item}`"
+        ></p>
+      </span>
+      <h1 webc:if="title" @text="title"></h1>
+      <!-- `data-pagefind-meta="desc"` is the element-content form: the standfirst
+           is captured as the record's description and still renders here. It is
+           what a story card prints under its heading, which makes it the same
+           field config/search.js calls `desc` for every other kind of record. -->
+      <p
+        webc:if="standfirst"
+        class="standfirst"
+        data-pagefind-meta="desc"
+        @text="standfirst"
+      ></p>
+      <time-date :date="date"></time-date>
+    </header>
+    <hr />
+    <!-- Optional, and the same file the feed card draws — see `lead_image` in
+         config/timeline.js. Under the rule rather than inside the header, so the
+         header stays one block of who-what-when and the story opens on the picture.
+
+         704 and 1408 deliberately: they are the pair <image-frame> already asks for,
+         and config/media.js warns that Cloudflare bills per unique source × option
+         string per month. Reusing them means the hero costs nothing the card has not
+         already paid for. Only `sizes` differs — the reading column is max-w-4xl,
+         not a 22rem card.
+
+         `data-thumb` is a third width, and it is here rather than in the meta
+         attribute on <main> for two separate reasons. A Cloudflare Images URL
+         contains `width=352,format=auto`, and Pagefind splits that attribute on
+         commas — the URL would arrive in halves. And `image[src]` would take the
+         1408-wide hero for a thumbnail drawn at 5rem. 352 is the width
+         <cover-art>, /job/ and the gallery thumbnails already ask for, which is
+         the same `RESULT_WIDTH` config/search.js stamps on every other record:
+         one more option string on an existing source, not a fourth transform. -->
+    <img
+      webc:if="lead_image"
+      :src="imageUrl(lead_image, 1408)"
+      :srcset="imageSrcset(lead_image, [704, 1408])"
+      sizes="(min-width: 1024px) 56rem, 100vw"
+      :width="imageShape(lead_image)?.width || false"
+      :height="imageShape(lead_image)?.height || false"
+      :alt="lead_alt || ''"
+      :data-thumb="imageUrl(lead_image, 352)"
+      data-pagefind-meta="image[data-thumb], image_alt[alt]"
+      decoding="async"
+    />
+    <template webc:nokeep @html="content"></template>
+    <code-highlight
+      webc:nokeep
+      webc:if="/<code class=&quot;language-/.test(content)"
+    ></code-highlight>
+  </article>
+</main>

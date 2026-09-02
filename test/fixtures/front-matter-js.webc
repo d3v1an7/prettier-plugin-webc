@@ -1,0 +1,10 @@
+---js
+const title = "My page title";
+
+ function currentDate() {
+      return (new Date()).toLocaleString();
+}
+---
+
+<h1 @text="title"></h1>
+<p>Published on <time @text="currentDate()"></time></p>

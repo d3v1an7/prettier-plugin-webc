@@ -1,0 +1,358 @@
+<!--
+  One event on the timeline. Props: event (a normalised event from config/timeline.js).
+
+  The `id` is the anchor target for deep links from other views, and it is the
+  published permalink: since a year is a page, `/img/2018/#img-1234` is settled for
+  good.
+
+  `data-month` is what the year rail measures against. No search haystack ships
+  with a card and no `data-pagefind-ignore`: search indexes the timeline
+  collection event by event (config/search.js) rather than reading this page.
+  `event.ownPage` is still load-bearing elsewhere — it keeps the anchor rewrite
+  and /timeline-anchors.json off a card that never moved to a year page.
+
+  **Three children, in this order**, because from md up the item is a
+  three-track grid and these are its tracks: the date gutter, the marker lane
+  the spine runs through, and the card. Source order is the visual order, so
+  nothing needs a grid-column. Below md they are an ordinary block flow with the
+  marker lifted out.
+-->
+<script webc:setup>
+  // A title split for the mark that follows it: everything up to the last
+  // character, and that character. See the note on the <h3> below, and
+  // markedLabel in config/timeline.js — a status's inline links are held the
+  // same way. Split by code point, because a title can end in an emoji.
+  export function markTail(title) {
+    const chars = [...String(title)];
+    return [chars.slice(0, -1).join(''), chars.slice(-1).join('')];
+  }
+</script>
+<li
+  class="timeline-item"
+  data-timeline-item
+  :id="event.id"
+  :data-type="event.type"
+  :data-month="event.monthKey"
+  :data-story="event.story ? '' : false"
+  :data-embed="event.embeds && event.embeds.length ? '' : false">
+  <!-- The gutter. A sibling of .timeline-card rather than a child, so it can be
+       a track of its own: from md up a column of dates and tags beside the
+       spine, below md a flex row above the title.
+
+       Every event is one moment, so this is one date — a job's start and finish
+       are two cards, and the resume states its own durations.
+
+       `short`, because a 9rem column will not take the full month name. Display
+       only; the datetime attribute carries the whole date. **It has to be
+       `:short="true"`** — a bare `short` arrives as the empty string and reads
+       as false. -->
+  <p class="timeline-meta">
+    <time-date
+      :date="event.date"
+      :precision="event.precision"
+      :short="true"></time-date>
+    <span
+      class="tag"
+      @text="event.label"></span>
+  </p>
+  <!-- The mark, and for an event that carries an `anchor` it is also that event's
+       permalink. Which events those are is not decided here — it is one rule about
+       every card, stamped in one pass in config/timeline.js, and the short form of
+       it is: a card that is the whole of its own content links to itself, and the
+       mark always draws that link. Only an event with a page of its own — a job, a
+       kit item, an essay — renders the bare icon, because its heading goes to the
+       page that holds the real thing.
+
+       **`anchorSecondary` is the whole of the difference between two marks that
+       look identical.** A titled gallery prints a heading that is already this
+       permalink, so its mark is a second route to a place the card has announced
+       once: `tabindex="-1"` and `aria-hidden`, a place for a mouse to land and not
+       a second stop in the tab order or the link list. Exactly what the story
+       card's lead image does further down, for exactly the reason.
+
+       It is drawn at all because .timeline-marker-link is layout and nothing else —
+       a linked mark and a bare one are the same pixels, so a mark that stood down
+       could only be told from one that had not by clicking it and getting nothing.
+
+       The marks that stay reachable are the ones carrying the only link to the card
+       itself: a status and an untitled pic, which print no heading (wrapping a
+       status's copy would make the whole thing a link to itself, which on /txt/
+       points at the page already open), and a review, a clip and a VOD, whose
+       headings go to StoryGraph or to YouTube.
+
+       Which mark is `event.icon`, handed to <svg-icon> as a prop — the same
+       one-component-many-names arrangement <nav-social> uses.
+
+       <svg-icon> is aria-hidden, so the anchor would otherwise have no accessible
+       name; the sr-only span is what a screen reader announces — dropped on a
+       secondary mark, which announces nothing at all. -->
+  <span
+    class="timeline-marker"
+    :data-phase="event.phase || 'point'">
+    <a
+      webc:if="event.anchor"
+      class="timeline-marker-link"
+      :href="event.anchor"
+      :tabindex="event.anchorSecondary ? '-1' : false"
+      :aria-hidden="event.anchorSecondary ? 'true' : false"
+      ><svg-icon :@name="event.icon"></svg-icon
+      ><span
+        webc:if="!event.anchorSecondary"
+        class="sr-only"
+        >Permalink</span
+      ></a
+    >
+    <svg-icon
+      webc:if="!event.anchor"
+      :@name="event.icon"></svg-icon>
+  </span>
+  <div class="timeline-card">
+    <!-- Size comes from the global h3 rule; this only needs the tighter margin.
+
+         The title is its own span rather than the anchor's `@text`, because an
+         external event prints a mark after it and `@text` sets textContent,
+         which would wipe the sibling. The mark is inside the anchor, so it
+         shares the hit area and the hover underline.
+
+         **No whitespace between the two, and the last character of the title
+         comes into the box with the mark.** An <svg> is an atomic inline and
+         every engine may break before one, so a lone icon under a wrapped title
+         reads as a rendering fault. `.icon-external-tail` is `white-space:
+         nowrap`. A word joiner (U+2060) does nothing — measured; see
+         markedLabel in config/timeline.js, which holds a status's inline links
+         the same way. One character rather than the last word, because the box
+         cannot be broken and has to fit a line on its own.
+
+         aria-hidden, with no "opens in a new tab": every off-site link already
+         gets target="_blank" from the linksAndQuotes plugin, so the mark says
+         what is true of all of them rather than something unique to this one. -->
+    <!-- A status is the one event with no heading: one block of copy with its
+         links inline. `body` is built and escaped by linkifyStatus in
+         config/timeline.js, which is why this is @html — and `<3` is in this
+         data, so @text would print the markup around the links.
+
+         An event that fills `body` fills neither `title` nor `summary`. -->
+    <!-- A card with no title still needs a heading, to give the list item an
+         accessible name. The id is here for the document outline alone, and
+         stays because it is a stable target somebody may have linked to.
+
+         Two kinds land here: a status, which is one block of copy, and a pic,
+         which has a title but nowhere to print it — over a single frame the
+         title is the caption said twice (see imgEvents). `event.srTitle` is
+         what the card is in a word, and the date tells two of them apart. -->
+    <h3
+      webc:if="event.srTitle"
+      class="sr-only"
+      :id="`${event.id}-h`"
+      @text="`${event.srTitle} — ${dateHuman(event.date, event.precision)}`"></h3>
+    <p
+      webc:if="event.body"
+      class="timeline-status"
+      @html="event.body"></p>
+    <!-- A status that signs off with a link prints it under the copy rather
+         than at the end of the last sentence (see splitTrailingLinks). A second
+         <p> rather than a <br>: a <p> cannot hold another, so the split has to
+         happen out here. -->
+    <p
+      webc:if="event.bodyLinks"
+      class="timeline-status timeline-status-links"
+      @html="event.bodyLinks"></p>
+    <!-- The line across the top of a story card: what it is about on the left, how
+         long it takes on the right. Only a story has one — every other type carries
+         something different under `meta` and none of them is a teaser for a page
+         somewhere else, so the two guards below are the whole of the gate.
+
+         The tag in the gutter is the section token, so every essay's reads
+         `txt` and none says which essay it is; these are the story's own tags,
+         the same ones its page prints over its title. The read time shares the
+         row, which keeps the gutter to the two lines the marker's 4rem was
+         measured for.
+
+         Over the title rather than under the standfirst, because a title and
+         its summary are one thought and nothing goes between them.
+
+         **`ml-auto` rather than `justify-between`**: there is no left group to
+         hold the tags together, and with a variable number of them an auto
+         margin on the last item is the only thing that lands right whether
+         there are three tags, one, or none. -->
+    <p
+      webc:if="event.story && (event.meta?.tags?.length || event.readTime)"
+      class="timeline-topline">
+      <span
+        webc:for="tag of event.meta?.tags || []"
+        class="tag"
+        @text="`#${tag}`"></span>
+      <span
+        webc:if="event.readTime"
+        class="tag timeline-readtime"
+        ><svg-icon
+          @name="clock"
+          class="icon-readtime"></svg-icon
+        ><span @text="event.readTime"></span
+      ></span>
+    </p>
+    <h3
+      webc:if="!event.srTitle"
+      class="mb-1"
+      :id="`${event.id}-h`">
+      <a
+        class="link-underline-hover"
+        :href="event.url"
+        ><span
+          @text="event.external ? markTail(event.title)[0] : event.title"></span
+        ><span
+          webc:if="event.external"
+          class="icon-external-tail"
+          ><span @text="markTail(event.title)[1]"></span
+          ><svg-icon
+            @name="external-link"
+            class="icon-external"></svg-icon></span
+      ></a>
+    </h3>
+    <!-- Cover art + rating, or an inline player. Above the summary, so a
+         caption reads as the line under its media.
+
+         A review is the exception: cover art is 80px wide, so the creator, the
+         rating and the review stack in the column beside it. <timeline-media>
+         prints the summary there, which is why the paragraph below sits out. -->
+    <timeline-media
+      webc:nokeep
+      webc:if="event.media && !event.story"
+      :@media="event.media"
+      :@zoom="true"
+      :@eager="eager"
+      :@summary="event.media.kind === 'cover' ? event.summaryHtml : false"></timeline-media>
+    <!-- A story's lead image is a second way into the same page. Everything
+         else in the feed is the whole of itself and has nowhere to go, so its
+         media is not a link.
+
+         `tabindex="-1"` and `aria-hidden`, because the heading above already
+         links to this URL: this adds somewhere for a mouse to land, not a
+         second stop announcing the same destination. That takes the picture's
+         `alt` out of the accessibility tree, which is right for a card — the
+         lead image is announced properly on the story's own page. -->
+    <a
+      webc:if="event.media && event.story"
+      class="timeline-media-link"
+      :href="event.url"
+      tabindex="-1"
+      aria-hidden="true">
+      <timeline-media
+        webc:nokeep
+        :@media="event.media"
+        :@eager="eager"
+        :@summary="false"></timeline-media>
+    </a>
+    <!-- @html, and escaped upstream rather than here. `summaryHtml` is built by
+         linkifyStatus in config/timeline.js — the same function a status's copy
+         goes through — so a URL somebody typed into a caption is a link and a
+         `<3` is still a `<3`. `event.summary` beside it stays plain text and is
+         what Pagefind indexes; @text here would print the anchors. -->
+    <p
+      webc:if="event.summaryHtml && event.media?.kind !== 'cover'"
+      class="timeline-summary"
+      @html="event.summaryHtml"></p>
+    <!-- What this card cited, drawn where the addresses used to be printed.
+         config/embeds.js is the one place that decides: a post, a clip, a
+         track, a rehosted picture, or the site itself.
+
+         **A card replaces a sign-off, never a mention.** Only the run of links
+         a status ends on gets one — the test `splitTrailingLinks` has always
+         made, asked a second question. A link mid-sentence keeps its anchor,
+         which is why one status of 22 YouTube links in a bulleted list draws no
+         players at all. Nothing is stripped here or upstream: the run was
+         already out of the copy before anything asked what to draw.
+
+         A caption comes through the same list with its posts only, and there
+         the strip in config/tweets.js is still what removes the address —
+         a caption is never split, and two of the three citing ones are nothing
+         but the URL.
+
+         **Below the picture and the caption, not above them.** A status prints
+         nothing between its copy and here, so an embed still lands directly
+         under the sentence that cited it; a pic has its own photograph to show
+         first, and the thing it was quoting reads as what is being replied to
+         rather than as the card's lead image.
+
+         **Five independent `webc:if`s, not an if/elseif chain.** Measured:
+         inside a `webc:for`, only the leading `webc:if` of a chain of sibling
+         <template>s ever fires — every `webc:elseif` and the `webc:else` are
+         dropped silently, and the page builds clean with four fifths of the
+         embeds missing. `describe` in config/embeds.js emits exactly these five
+         kinds, so testing each one outright is complete as well as safe.
+
+         `webc:nokeep` on the components is required, not tidy: without it an
+         object prop arrives undefined and the build dies inside the child with
+         no mention of this file. -->
+    <template
+      webc:nokeep
+      webc:if="event.embeds && event.embeds.length">
+      <template
+        webc:nokeep
+        webc:for="embed of event.embeds">
+        <template
+          webc:nokeep
+          webc:if="embed.kind === 'tweet'">
+          <tweet-card
+            webc:nokeep
+            :@tweet="embed.tweet"></tweet-card>
+        </template>
+        <template
+          webc:nokeep
+          webc:if="embed.kind === 'youtube'">
+          <video-youtube
+            :id="embed.id"
+            :videotitle="embed.title || 'Video'"></video-youtube>
+        </template>
+        <template
+          webc:nokeep
+          webc:if="embed.kind === 'player'">
+          <embed-player
+            webc:nokeep
+            :@embed="embed"></embed-player>
+        </template>
+        <template
+          webc:nokeep
+          webc:if="embed.kind === 'image'">
+          <image-frame :@media="linkPhoto(embed)"></image-frame>
+        </template>
+        <template
+          webc:nokeep
+          webc:if="embed.kind === 'site'">
+          <link-card
+            webc:nokeep
+            :@link="embed"></link-card>
+        </template>
+      </template>
+    </template>
+
+    <!-- A way out of the card, for the two kinds of event that summarise
+         something written up in full elsewhere: a job and a story. `event.url`
+         is already that target, so this is a second, plainer way to say there
+         is more.
+
+         **Which events get one is `event.action`**, the way `label` and `icon`
+         are data — not `event.type === 'job'` here. A component asking what
+         type an event is in order to decide what to draw is the seam that has
+         to move every time an answer changes. -->
+    <p
+      webc:if="event.action"
+      class="tag timeline-action">
+      <a
+        class="link-underline"
+        :href="event.url"
+        ><span @text="event.action"></span> <span aria-hidden="true">→</span></a
+      >
+    </p>
+    <!-- Inside the card rather than out in the date gutter: liking a thing is
+         an action on it, and the gutter is wayfinding. So it sits under the
+         copy beside .timeline-action, the other row of card furniture that is a
+         control rather than content.
+
+         Every card gets one, all seven types: carving out an exception would
+         need a rule, and there isn't one. -->
+    <timeline-like
+      webc:nokeep
+      :@event-id="event.id"></timeline-like>
+  </div>
+</li>

@@ -1,0 +1,36 @@
+<p @html="test({ id: foo, bar: bar })"></p>
+<a :href="url('x')" :class="cls ? 'a' : 'b'" class="a b" data-x="a  b">link</a>
+<img @attributes="({ src: image, alt: title })" />
+<div @attributes="({ a: 1, b: 2 })"></div>
+<svg-icon
+  @name="external-link"
+  @label="Hello World"
+  :@count="count + 1"
+></svg-icon>
+<p @text="this is not js"></p>
+<p @text="say('hi')"></p>
+<p @raw="`a${b}` + 'c'"></p>
+<p @text="`quoted &quot;inside&quot; template`"></p>
+<p
+  :data-thing="({
+    a: 1,
+    b: 2,
+    ccccccccccccccccccccc: 3,
+    ddddddddddddddddddddddddddd: 4,
+    eeeeeeeeeeeeeeeeeeeeee: 5,
+  })"
+></p>
+<p
+  :data-long="
+    someFunctionCall(
+      withArguments,
+      andMore,
+      andEvenMoreArguments,
+      toForceWrapping,
+      yes,
+    )
+  "
+></p>
+<my-component :items="[1, 2, 3]" @html="items.map((i) => i * 2).join(',')"
+  >{{ notInterpolation }}</my-component
+>

@@ -1,0 +1,29 @@
+<template webc:type="js">
+  posts.length > 3 ? `<a href="/authors/${slug}/">All ${posts.length} posts</a>` : "";
+</template>
+<div><template   webc:type="js">export default `<b>${count}</b>`</template></div>
+<template
+  webc:type="render"
+  webc:raw
+>
+  return `<p>${count > 2 ? "many" : "few"}</p>`;
+</template>
+<template webc:type="js" webc:if="a>b"   :@x="1+1">const items = Array.from({ length: count }, (_, i) => `<li>${title} ${i + 1}</li>`);
+export default `<ul>${items.join("")}</ul>`;</template>
+<template webc:type="js">
+  this is not js (
+</template>
+<template webc:type="11ty" 11ty:type="md"># Heading
+<template webc:type="js">x</template>
+</template>
+<!-- prettier-ignore -->
+<template webc:type="js">a  =  1</template>
+<template webc:type="js"></template>
+<template webc:type="js">   </template>
+<span>a</span><template webc:type="js">1</template><span>b</span>
+<script webc:type="js">
+const y   = 1; export default y
+</script>
+<script webc:type="render">
+export default function(){return `<img src="${this.src}">`}
+</script>

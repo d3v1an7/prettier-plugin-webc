@@ -1,0 +1,43 @@
+{
+  "name": "prettier-plugin-webc",
+  "version": "0.1.0",
+  "description": "Prettier formatting for WebC files, including the JavaScript inside expression attributes, front matter and render templates.",
+  "type": "module",
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "npm run format:check && node --test test/*.test.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "keywords": [
+    "prettier",
+    "prettier-plugin",
+    "webc",
+    "11ty",
+    "eleventy",
+    "html",
+    "formatter"
+  ],
+  "author": "Ben White",
+  "license": "MIT",
+  "peerDependencies": {
+    "prettier": "^3.0.0"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6",
+    "prettier-plugin-jsdoc": "1.8.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

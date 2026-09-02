@@ -1,0 +1,17 @@
+---js
+{
+  pagination: {
+    data: "all.authors",
+    alias: "item",
+    size: 1,
+  },
+  permalink: ({ item }) => {
+    return item.path;
+  },
+}
+---
+
+<h1 @text="item.author"></h1>
+<ul webc:for="article of item.articles">
+  <li @text="article.title"></li>
+</ul>

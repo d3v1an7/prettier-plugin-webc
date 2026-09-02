@@ -1,0 +1,23 @@
+---json
+{
+  "title": "Render function",
+  "tags": ["webc", "demo"],
+  "count": 3
+}
+---
+
+<template webc:type="js">
+  const items = Array.from({ length: count }, (_, i) => `<li>${title} ${i + 1}</li>`);
+  export default `<ul>${items.join("")}</ul>`;
+</template>
+<template webc:type="render" webc:raw>
+  return `<p>${count > 2 ? "many" : "few"}</p>`;
+</template>
+<my-widget webc:import="./components/my-widget.webc" @label="Hello" :@count="count"></my-widget>
+<div webc:if="count > 1">many</div>
+<div webc:elseif="count === 1">one</div>
+<div webc:else>none</div>
+<img @attributes="({ src: image, alt: title })" />
+<style webc:scoped>
+  :host { display: block; }
+</style>

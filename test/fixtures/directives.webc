@@ -1,0 +1,11 @@
+<div webc:if="a&&b"></div>
+<div webc:elseif="c||  d"></div>
+<div webc:else></div>
+<ul webc:for="item of items.filter(i=>i.ok)">
+  <li webc:for="(key,value) in obj" @text="key"></li>
+  <li webc:for="( item , index ) of list.items" webc:if="index>0"></li>
+  <li webc:for="{a,b} of xs"></li>
+  <li webc:for="x in"></li>
+</ul>
+<div webc:is="my-component" webc:import="./components/my-component.webc" webc:root="override" webc:bucket="defer" webc:keep webc:nokeep webc:raw webc:ignore></div>
+<my-widget webc:import="npm:@11ty/eleventy-plugin-webc/components" @label="Hello" :@count="count"></my-widget>
